@@ -5,6 +5,24 @@ void main() {
   runApp(const MyApp());
 }
 
+class Post{
+  String body = '';
+  String author = '';
+  int likes = 0;
+  bool userLiked = false;
+
+  Post(this.body, this.author);
+
+  void likePost(){
+    userLiked = !userLiked;
+    if (userLiked){
+      likes += 1;
+    } else{
+      likes -= 1;
+    }
+  }
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -43,11 +61,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String text = '';
+  List<Post> posts = [];
 
-  void changeText(String text){
+  void newPost(String text){
     setState(() {
-      this.text = text;
+      posts.add(Post(text, 'Manny'));
     });
   }
 
@@ -56,19 +74,21 @@ class _MyHomePageState extends State<MyHomePage> {
     
     return Scaffold(
       appBar: AppBar(title: Text("Hello World!"),),
-      body: Column(children: <Widget>[ComentInputWidget(changeText), Text(text)],)
+      body: Column(children: <Widget>[
+        Expanded(child: PostList(posts)),
+        CommentInputWidget(newPost)],)
     );
   }
 }
 
-class ComentInputWidget extends StatefulWidget {
+class CommentInputWidget extends StatefulWidget {
   final Function(String) callback;
-  const ComentInputWidget(this.callback, {super.key});
+  const CommentInputWidget(this.callback, {super.key});
   @override
-  State<ComentInputWidget> createState() => _ComentInputWidgetState();
+  State<CommentInputWidget> createState() => _CommentInputWidgetState();
 }
 
-class _ComentInputWidgetState extends State<ComentInputWidget> {
+class _CommentInputWidgetState extends State<CommentInputWidget> {
   final controller = TextEditingController();
 
   @override
@@ -79,6 +99,7 @@ class _ComentInputWidgetState extends State<ComentInputWidget> {
   void click(){
     widget.callback(controller.text);
     controller.clear();
+    FocusScope.of(context).unfocus();
   }
 
   @override
@@ -94,5 +115,33 @@ class _ComentInputWidgetState extends State<ComentInputWidget> {
             splashColor: Colors.blue, 
             tooltip: 'Post Comment',
             icon: Icon(Icons.send))),);
+  }
+}
+
+class PostList extends StatefulWidget {
+  final List<Post> listItems;
+  const PostList(this.listItems, {super.key});
+  @override
+  State<PostList> createState() =>  _PostListState();
+}
+
+class  _PostListState extends State<PostList> {
+  void like(Function callback){
+    setState(() {
+      callback();
+    });
+  }
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: widget.listItems.length,
+      itemBuilder: (context, index){
+        var post = widget.listItems[index];
+        return Card(child: Row(children: <Widget>[
+          Expanded(child: ListTile(title: Text(post.body), subtitle: Text(post.author),)),
+          Row(children: <Widget>[
+            Container(padding: EdgeInsets.fromLTRB(0, 0, 10, 0), child: Text(post.likes.toString(), style: TextStyle(fontSize: 20)), ),
+            IconButton(onPressed: () => like(post.likePost), icon: Icon(Icons.thumb_up), color: post.userLiked ? Colors.green : Colors.black,)],)],),);          
+      },);
   }
 }
