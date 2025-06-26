@@ -4,7 +4,8 @@ import 'post_list.dart';
 import 'comment_input_widget.dart';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+  final String name;
+  const MyHomePage(this.name, {super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -15,7 +16,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void newPost(String text){
     setState(() {
-      posts.add(Post(text, 'Manny'));
+      posts.add(Post(text, widget.name));
     });
   }
 
